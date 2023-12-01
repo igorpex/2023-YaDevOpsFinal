@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bingo-config
+  namespace: bingo
+  labels:
+    app: bingoworker
+# Here is configuration data, which will be mapped in Deployment yml. Password is changed.
+data:
+  config.yaml: |-
+    student_email: igor.bogdanov@gmail.com
+    postgres_cluster:
+      hosts:
+      - address: 82.97.240.115
+        port: 5432
+      user: gen_user
+      password: ?BYeBZ
+      db_name: new_db
+      ssl_mode: disable
+      use_closest_node: false

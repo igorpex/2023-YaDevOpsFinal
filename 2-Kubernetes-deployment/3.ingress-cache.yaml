@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bingo-ingress-cached
+  namespace: bingo
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Configuration of cache. 1m is 1 minute.
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_cache static-cache;
+      proxy_cache_valid any 1m;
+      add_header X-Cache-Status $upstream_cache_status;
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+spec:
+  tls:
+    - secretName: bingo-launc-ru-tls
+      hosts:
+        - bingo.launc.ru
+  rules:
+    - host: bingo.launc.ru
+      http:
+        paths:
+          # Here is path to apply this Ingress yml.
+          - path: /long_dummy
+            pathType: Prefix
+            backend:
+              service:
+                name: bingo-service
+                port:
+                  number: 33719
+  ingressClassName: nginx

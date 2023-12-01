@@ -1,0 +1,9 @@
+# This is ConfigMap of Nginx Ingress Controller
+data:
+  # This line was presented by default.
+  allow-snippet-annotations: "true"
+  # This http-snippet is added to ConfigMap of NginxIngress Controller to enable cache.
+  # As I use Helm, it is better to move it to Helm config.
+  http-snippet: >-
+    proxy_cache_path /tmp/nginx_cache levels=1:2 keys_zone=static-cache:10m
+    max_size=10g  inactive=60m use_temp_path=off;

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bingo-service
+  namespace: bingo
+spec:
+  selector:
+    app: bingoworker
+  ports:
+    - protocol: TCP
+      port: 33719
+      targetPort: 33719
+  type: ClusterIP

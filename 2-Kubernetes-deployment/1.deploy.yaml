@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bingoworker
+  namespace: bingo
+spec:
+  #2 pods
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bingoworker
+  template:
+    metadata:
+      labels:
+        app: bingoworker
+    spec:
+      # This is required to pull image from my docker registry.
+      # Registry secret is kept in Kubernetes.
+      imagePullSecrets:
+        - name: registry-auth
+      containers:
+        - name: bingoworker
+          image: registry.launc.ru/igorpex/bingo:1.2
+          ports:
+            - containerPort: 33719
+          volumeMounts:
+            # Mounting of working configuration from ConfigMap
+            - name: config-volume
+              mountPath: /opt/bingo
+            # Mounting of host folder to write logs
+            - name: log-volume
+              mountPath: /opt/bongo/logs/dff21986f6
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: "2"
+            requests:
+              memory: 512Mi
+              cpu: "0.4"
+          # This is required to understand then application is down and pod needs to restart
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 33719
+              scheme: HTTP
+            initialDelaySeconds: 20
+            timeoutSeconds: 2
+            periodSeconds: 3
+            successThreshold: 1
+            failureThreshold: 2
+          # This is required to understand that application has started and traffic should be sent to that pod
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 33719
+              scheme: HTTP
+            initialDelaySeconds: 3
+            timeoutSeconds: 1
+            periodSeconds: 1
+            successThreshold: 1
+            failureThreshold: 2
+      volumes:
+        # Working configuration is kept in ConfigMap
+        - name: config-volume
+          configMap:
+            # defaultMode: 420
+            name: bingo-config
+        # Host folder to write logs
+        - name: log-volume
+          hostPath:
+            path: /tmp
